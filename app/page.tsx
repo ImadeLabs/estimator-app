@@ -1,15 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
-// Exchange rates adjusted to match your specific $53,999 request for the 70M NGN land
+// Exchange rates
 const RATES = {
   USD: 1296.32, 
   GBP: 1650.00, 
   EUR: 1420.00, 
 };
 
-// Resale Value range for dynamic scaling
+// Resale Value ranges
 const MIN_RESALE = 150000000; 
 const MAX_RESALE = 350000000; 
 const MIN_BUILD_COST = 30000000;
@@ -17,13 +17,7 @@ const MAX_BUILD_COST = 150000000;
 
 export default function Estimator() {
   const [buildCost, setBuildCost] = useState(50000000); 
-  const [currency, setCurrency] = useState<'USD' | 'GBP' | 'EUR'>('USD');
-  // Add an 'isMounted' state to completely prevent any hydration errors
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const [currency, setCurrency] = useState('USD');
 
   const landCost = 70000000;
   const facilitatorFee = landCost * 0.05; 
@@ -34,22 +28,20 @@ export default function Estimator() {
   const totalProjectCost = landCost + buildCost + facilitatorFee;
   const projectedProfit = projectedResale - totalProjectCost;
 
-  // We explicitly use 'en-US' so Vercel and your phone format numbers the exact same way
-  const formatNaira = (amount: number) => amount.toLocaleString('en-US');
+  // Crash-proof number formatter
+  const formatNumber = (num) => {
+    return Number(num).toLocaleString('en-US', { maximumFractionDigits: 0 });
+  };
 
-  const getConverted = (ngnAmount: number) => {
-    return (ngnAmount / RATES[currency]).toLocaleString('en-US', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    });
+  const getConverted = (ngnAmount) => {
+    return formatNumber(ngnAmount / RATES[currency]);
   };
 
   const getCurrencySymbol = () => {
-    switch (currency) {
-      case 'USD': return '$';
-      case 'GBP': return '£';
-      case 'EUR': return '€';
-    }
+    if (currency === 'USD') return '$';
+    if (currency === 'GBP') return '£';
+    if (currency === 'EUR') return '€';
+    return '$';
   };
 
   const handleWhatsAppShare = () => {
@@ -59,11 +51,8 @@ export default function Estimator() {
     window.open(url, '_blank');
   };
 
-  // Don't render the dynamic parts until the client has mounted
-  if (!isMounted) return null;
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 font-sans pb-24">
+    <div suppressHydrationWarning className="min-h-screen bg-gray-50 py-8 px-4 font-sans pb-24">
       <div className="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
         
         {/* Header with Distress Sale Badge */}
@@ -84,7 +73,7 @@ export default function Estimator() {
 
           {/* Currency Toggle */}
           <div className="flex justify-center bg-gray-100 p-1 rounded-full">
-            {(['USD', 'GBP', 'EUR'] as const).map((cur) => (
+            {['USD', 'GBP', 'EUR'].map((cur) => (
               <button
                 key={cur}
                 type="button"
@@ -123,7 +112,7 @@ export default function Estimator() {
             <p className="text-xs text-gray-500 mb-4">Estimate building to standard with current premium materials.</p>
             
             <div className="text-2xl font-bold text-emerald-700 mb-2 text-center">
-              ₦{formatNaira(buildCost)}
+              ₦{formatNumber(buildCost)}
             </div>
             
             <input
@@ -141,18 +130,18 @@ export default function Estimator() {
             </div>
           </div>
 
-          {/* Investment ROI Section - Now Dynamic */}
+          {/* Investment ROI Section */}
           <div className="bg-gray-900 rounded-2xl p-5 text-white shadow-lg">
             <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-4 text-center">Investment Potential</p>
             
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-300">Total Investment:</span>
-              <span className="font-bold">₦{formatNaira(totalProjectCost)}</span>
+              <span className="font-bold">₦{formatNumber(totalProjectCost)}</span>
             </div>
             
             <div className="flex justify-between items-center mb-4">
               <span className="text-sm text-gray-300">Est. Resale Value:</span>
-              <span className="font-bold text-emerald-400">₦{formatNaira(projectedResale)}</span>
+              <span className="font-bold text-emerald-400">₦{formatNumber(projectedResale)}</span>
             </div>
 
             <hr className="border-gray-700 mb-4" />
@@ -160,7 +149,7 @@ export default function Estimator() {
             <div className="text-center">
               <p className="text-sm text-gray-300 mb-1">Projected Profit</p>
               <p className="text-3xl font-extrabold text-emerald-400">
-                ₦{formatNaira(projectedProfit)}
+                ₦{formatNumber(projectedProfit)}
               </p>
               <p className="text-xs text-gray-400 mt-2">
                 ≈ {getCurrencySymbol()}{getConverted(projectedProfit)} {currency}
