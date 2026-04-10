@@ -16,8 +16,9 @@ const MIN_BUILD_COST = 30000000;
 const MAX_BUILD_COST = 150000000;
 
 export default function Estimator() {
-  const [buildCost, setBuildCost] = useState(50000000); 
-  const [currency, setCurrency] = useState('USD');
+  const [buildCost, setBuildCost] = useState<number>(50000000); 
+  // Explicitly tell TypeScript the allowed currencies
+  const [currency, setCurrency] = useState<'USD' | 'GBP' | 'EUR'>('USD');
 
   const landCost = 70000000;
   const facilitatorFee = landCost * 0.05; 
@@ -28,12 +29,12 @@ export default function Estimator() {
   const totalProjectCost = landCost + buildCost + facilitatorFee;
   const projectedProfit = projectedResale - totalProjectCost;
 
-  // Crash-proof number formatter
-  const formatNumber = (num) => {
-    return Number(num).toLocaleString('en-US', { maximumFractionDigits: 0 });
+  // Added ': number' to satisfy Vercel's strict build checks
+  const formatNumber = (num: number) => {
+    return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
   };
 
-  const getConverted = (ngnAmount) => {
+  const getConverted = (ngnAmount: number) => {
     return formatNumber(ngnAmount / RATES[currency]);
   };
 
@@ -73,7 +74,7 @@ export default function Estimator() {
 
           {/* Currency Toggle */}
           <div className="flex justify-center bg-gray-100 p-1 rounded-full">
-            {['USD', 'GBP', 'EUR'].map((cur) => (
+            {(['USD', 'GBP', 'EUR'] as const).map((cur) => (
               <button
                 key={cur}
                 type="button"
