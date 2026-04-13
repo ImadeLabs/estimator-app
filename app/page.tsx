@@ -4,17 +4,31 @@ import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { propertyList } from '@/lib/properties';
 
-const RATES = { USD: 1350 }; // Simplified rate for the example
+const RATES = { USD: 1350 }; 
 
 export default function PropertyTemplate() {
   const params = useParams();
-  const id = params.id as string;
+  
+  // 1. Get the ID and find the property FIRST
+  const id = params?.id as string;
   const property = propertyList[id];
 
-  // State for the selected plot (defaults to the first one)
-  const [selectedPlot, setSelectedPlot] = useState(property?.plots[0]);
+  // 2. SAFETY CHECK: If property is missing, stop here and show the error.
+  // This prevents the code below from trying to read plots of "undefined"
+  if (!property) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6 text-center">
+        <div className="bg-white p-8 rounded-3xl shadow-xl">
+          <h1 className="text-2xl font-bold text-red-600 mb-2">Property Not Found</h1>
+          <p className="text-gray-500 text-sm">We couldn't find a property for: "{id}"</p>
+          <p className="text-xs text-gray-400 mt-4 italic text-center">Hint: Check if the name in your URL matches the name in lib/properties.ts exactly.</p>
+        </div>
+      </div>
+    );
+  }
 
-  if (!property) return <div className="p-10 text-center text-red-500 font-bold">Property not found!</div>;
+  // 3. Now that we are 100% sure property exists, we can set the state
+  const [selectedPlot, setSelectedPlot] = useState(property.plots[0]);
 
   // Calculation logic
   const deposit = selectedPlot.price * 0.5;
@@ -82,7 +96,7 @@ export default function PropertyTemplate() {
           {/* WHATSAPP BUTTON */}
           <button 
             onClick={() => window.open(`https://wa.me/2348105105757?text=I'm interested in ${property.title} - ${selectedPlot.size}`, '_blank')}
-            className="w-full mt-6 bg-[#25D366] text-white font-bold py-4 rounded-xl shadow-lg"
+            className="w-full mt-6 bg-[#25D366] text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center gap-2"
           >
             Chat with Agent
           </button>
