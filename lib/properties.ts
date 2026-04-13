@@ -1,11 +1,27 @@
 // lib/properties.ts
-export const propertyList = {
+
+export interface Plot {
+  size: string;
+  type: string;
+  price: number;
+}
+
+export interface Property {
+  title: string;
+  location: string;
+  image: string;
+  color: string;
+  deadline?: string;
+  plots: Plot[];
+}
+
+// The [key: string] part here is what fixes your Vercel Build Error
+export const propertyList: { [key: string]: Property } = {
   "solar-city": {
     title: "Solar City Apo",
     location: "Apo, Burum West District",
     image: "/solarcityapo.jpg",
     color: "green",
-    deadline: "2026-05-11", // The date prices go up
     plots: [
       { size: "170SQM", type: "3 Bed Terrace", price: 4500000 },
       { size: "250SQM", type: "4 Bed Semi Detached", price: 6700000 },
